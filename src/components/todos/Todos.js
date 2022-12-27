@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { atom, useAtom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { v4 } from 'uuid';
-import Todo from '../Todo';
+import Todo from './Todo';
 // * Saving todos in localStorage here
 const todosAtom = atomWithStorage('todos', []);
 const inputsValueAtom = atom('');
