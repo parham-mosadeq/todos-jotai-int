@@ -1,18 +1,18 @@
 import React, { useRef } from 'react';
 import { atom, useAtom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 import { v4 } from 'uuid';
 import Todo from '../Todo';
-const todosAtom = atom([]);
+// * Saving todos in localStorage here
+const todosAtom = atomWithStorage('todos', []);
 const inputsValueAtom = atom('');
 const idAtom = atom('');
 const editIdAtom = atom(' ');
-const isDoneAtom = atom(false);
 const isEditingAtom = atom(false);
 
 const Todos = () => {
   const [todosList, setTodosList] = useAtom(todosAtom);
   const [inputsValue, setInputsValue] = useAtom(inputsValueAtom);
-  const [isDone, setIsDone] = useAtom(isDoneAtom);
   const [isEditing, setIsEditing] = useAtom(isEditingAtom);
   const [iD, setID] = useAtom(idAtom);
   const [editID, setEditID] = useAtom(editIdAtom);
@@ -34,14 +34,12 @@ const Todos = () => {
       setInputsValue('');
       setID(v4());
       setIsEditing(false);
-      setIsDone(false);
       // * Building our todo list to map over later
       setTodosList([
         ...todosList,
         {
           id: iD,
           todo: inputsValue,
-          isDone: isDone,
           isEditing: isEditing,
         },
       ]);
@@ -73,6 +71,20 @@ const Todos = () => {
     setEditID(id);
   };
 
+  const handleRemove = (id) => {
+    const newItems = todosList.filter((item) => item.id !== id);
+    setTodosList(newItems);
+  };
+  const handleDone = (e) => {
+    if (e.target.style.color === 'gray') {
+      e.target.style.color = 'black';
+      e.target.style.textDecoration = 'none';
+    } else {
+      e.target.style.textDecoration = 'line-through';
+      e.target.style.color = 'gray';
+    }
+  };
+
   // ! handling todo functions end
 
   return (
@@ -93,14 +105,22 @@ const Todos = () => {
         <button onClick={handleSubmit}>{isEditing ? 'Edit' : 'Add'}</button>
       </form>
       <div className='mt-6 mb-9'>
-        {todosList.length > 0 ? (
+        {todosList ? (
           todosList.map((item, idx) => {
             return (
               <div
                 key={item.id}
                 className='flex flex-col items-center justify-center  w-full   overflow-x-hidden '
               >
-                {<Todo item={item} idx={idx} handleDbClick={handleDbClick} />}
+                {
+                  <Todo
+                    item={item}
+                    idx={idx}
+                    handleDbClick={handleDbClick}
+                    handleRemove={handleRemove}
+                    handleDone={handleDone}
+                  />
+                }
               </div>
             );
           })
@@ -111,15 +131,15 @@ const Todos = () => {
         )}
       </div>
 
-      <div className='mt-10'>
-        <p className='text-gray-400 tracking-wider capitalize mt-4 '>
-          double click to edit entered todo
+      <div className='mt-10 text-center'>
+        <p className='text-gray-400 tracking-wider capitalize font-normal text-sm  mt-4 '>
+          double click on TODO to edit entered todo
         </p>
-        <p className='text-gray-400 tracking-wider capitalize mt-4 '>
-          use the ✔ to checkout the todo
+        <p className='text-gray-400 tracking-wider capitalize font-normal text-sm  mt-4 '>
+          click on todo number ex:{'todo:1'} to set it as finished
         </p>
-        <p className='text-gray-400 tracking-wider capitalize mt-4 '>
-          use the X to bring back the todo
+        <p className='text-gray-400 tracking-wider capitalize font-normal text-sm  mt-4 '>
+          click on todo number again to set it as unfinished
         </p>
       </div>
     </div>
